@@ -3,23 +3,42 @@ using namespace std;
 int hosting(int city);
 long int temp;
 double temp_f;
-int i=0,j = 0,k = 0,l = 0,m = 0,n = 0,o = 0;
+int i = 0, j = 0, k = 0, l = 0, m = 0, n = 0, o = 0;
 int check_info(int p, int s);
+int get_info(int city);
+int critera_checker(int city2);
+int get_count_of_plots(int city);
 
 struct info
 {
 	long long lower;
 	long long upper;
-	long long phone;   //phone number 
-	double size_of_plot; //size marlay
+	long long phone;           //phone number 
+	double size_of_plot;       //size marlay
 	int type_of_plot;
-	bool avail; //plot available or no (true means yes and false means no)
+	bool avail;               //plot available or no (true means yes and false means no)
 };
-info selling[7][6]; //We have 7 cities and capacity for 6 plots in each as of now;
-int check_info(int p, int s) {
+info selling[7][100]; //We have 7 cities and capacity for 100 plots in each as of now;
+info buying;
+int hosting(int city)    //This function calls function on basis of the city
+{
+		switch (city) {
+		case 0: check_info(0, i); i++; break;
+		case 1: check_info(1, j); j++; break;
+		case 2: check_info(2, k); k++; break;
+		case 3: check_info(3, l); l++; break;
+		case 4: check_info(4, m); m++; break;
+		case 5: check_info(5, n); n++; break;
+		case 6: check_info(6, o); o++; break;
+		default: cout << "Invalid city";
+		}
+		return 0;
+	}
+
+int check_info(int p, int s) {   //This collects all necessary information about the plot
 	if (s >= 6)
 	{
-		cout << "Error: Capacity reached for this city (Max 6 plots).\n";
+		cout << "Error: Capacity reached for this city .\n";
 		return 1;
 	}
 	cout << endl << "Enter the maximum amount for plot in pkr (non negotiable): ";
@@ -38,56 +57,122 @@ int check_info(int p, int s) {
 	cin >> temp_f;
 	selling[p][s].size_of_plot = temp_f;
 	selling[p][s].avail = true;
-	cout << "Your plot details are: \n upper price: " << selling[p][s].upper << "\nlower price: " << selling[p][s].lower;
+	cout << "\nYour plot details are: \nUpper price: " << selling[p][s].upper << "\nlower price: " << selling[p][s].lower;
 	cout << "\nSize of property: " << selling[p][s].size_of_plot << "\nPhone number: " << selling[p][s].phone;
 	cout << "\ntype of property " << selling[p][s].type_of_plot << "\navailable(true or false): " << selling[p][s].avail;
 	s++;
 	return 0;
 }
-int hosting(int city)
+int booking(int city)
 {
-	switch (city) {
-	case 0:check_info(0, i);break;
-	case 1:check_info(1, j);break;
-	case 2:check_info(2, k);break;
-	case 3:check_info(3, l);break;
-	case 4:check_info(4, m);break;
-	case 5:check_info(5, n);break;
-	case 6:check_info(6, o);break;
-	default: cout << "Invalid city"; 
-	}
-	return 0;	
+	cout << endl << "Enter the maximum amount you are willing to pay for the plot (PKR): ";
+	cin >> temp;
+	buying.upper = temp;
+
+	cout << endl << "Enter the minimum amount you are willing to pay for the plot (PKR): ";
+	cin >> temp;
+	buying.lower = temp;
+
+	cout << endl << "Type of plot you want:\n1) Residential\n2) Commercial\nSelect valid index: ";
+	cin >> temp;
+	buying.type_of_plot = temp;
+
+	cout << endl << "Enter the required plot size in marla: ";
+	cin >> temp_f;
+	buying.size_of_plot = temp_f;
+
+	if (city >= 0 && city <= 6)  
+		critera_checker(city);
+	else
+		cout << "Invalid city";
+	return 0;
+
+
 }
+int get_count_of_plots(int city) {
+	switch (city) {
+	case 0: return i;
+	case 1: return j;
+	case 2: return k;
+	case 3: return l;
+	case 4: return m;
+	case 5: return n;
+	case 6: return o;
+	default: return 0;
+	}
+}
+
+int critera_checker(int city2)
+{
+	int f= get_count_of_plots(city2);
+		for (int x = 0; x < f; x++)   
+		{
+			if (selling[city2][x].avail)   // only check available plots
+			{
+				
+				bool price_ok = (buying.lower >= selling[city2][x].lower &&
+					buying.upper <= selling[city2][x].upper);
+
+				bool type_ok = (buying.type_of_plot == selling[city2][x].type_of_plot);
+
+				bool size_ok = (buying.size_of_plot <= selling[city2][x].size_of_plot);
+
+				
+				if (price_ok && type_ok && size_ok)
+				{
+					cout << "\nPlot Found!\n";
+					cout << "Phone: " << selling[city2][x].phone << endl;
+					cout << "Price Range: " << selling[city2][x].lower
+						<< " - " << selling[city2][x].upper << endl;
+					cout << "Size: " << selling[city2][x].size_of_plot << endl;
+
+					selling[city2][x].avail = false;   // mark as booked
+					return 1;   // stop after finding the first match
+				}
+			}
+		}
+
+		cout << "\nNo matching plot found in this city.\n";
+		return 0;
+	}
 int main()
 {
 	int city;
 	int chaos;
-	cout << "HELLO! WELCOME TO PLOTIFY\n1)BOOKING\n2)SELLING\n What do you wanna do?(1 or 2)";
-	cin >> chaos;
+	char n = true;
+	cout << "====================WELCOME TO PLOTIFY====================\n";
+	while (n) {
 
-	switch (chaos) {
-	case 1:
-	{
-		cout << "The following cities are in our current portfolio; where you can put your plot up for buying: ";
-		cout << "\n1\tIslamabad\n2\tRawalpindi\n3\tLahore\n4\tKarachi\n5\tSargodha\n6\tAbottabad\n7\tMultan";
-		cout << "\nEnter the index of the city your plot is in: ";
-		cin >> city;
-		city = city - 1;  //Index of array starts from zero
-		hosting(city);
-		break;
+		cout << "\n1)SELLING\n2)BOOKING\n What do you wanna do ? (1 or 2)";
+		cin >> chaos;
+
+		switch (chaos) {
+		case 1:
+		{
+			cout << "The following cities are in our current portfolio; where you can put your plot up for buying: ";
+			cout << "\n1\tIslamabad\n2\tRawalpindi\n3\tLahore\n4\tKarachi\n5\tSargodha\n6\tAbottabad\n7\tMultan";
+			cout << "\nEnter the index of the city your plot is in: ";
+			cin >> city;
+			city = city - 1;  //Index of array starts from zero
+			hosting(city);
+			break;
+		}
+		case 2:
+		{
+			cout << "Available plots are in following cities: ";
+			cout << "\n1\tIslamabad\n2\tRawalpindi\n3\tLahore\n4\tKarachi\n5\tSargodha\n6\tAbottabad\n7\tMultan";
+			cout << "\nEnter the index of the city your plot is in: ";
+			cin >> city;
+			city = city - 1; //index starts from 0 of an array
+			booking(city);
+			break;
+		}
+		default:
+			cout << "Invalid option (press 1 or 2)";
+		}
+	
+		cout << "\nDo you want to perform another action?(1 or 0)";
+		cin >> n;
 	}
-	case 2:
-	{
-		cout << "Available plots are in following cities: ";
-		cout << "\n1\tIslamabad\n2\tRawalpindi\n3\tLahore\n4\tKarachi\n5\tSargodha\n6\tAbottabad\n7\tMultan";
-		cout << "\nEnter the index of the city your plot is in: ";
-		cin >> city;
-		city = city - 1; //index starts from 0 of an array
-		booking(city);
-		break;
-	}
-	default:
-		cout << "Invalid option (press 1 or 2)";
-	}
-	 return 0;
+	return 0;
 }
