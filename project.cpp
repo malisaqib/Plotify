@@ -84,7 +84,7 @@ int booking(int city)
 	if (city >= 0 && city <= 6)  
 		critera_checker(city);
 	else
-		cout << "Invalid city";
+		cout << "Invalid city!";
 	return 0;
 }
 int get_count_of_plots(int city) {
