@@ -86,8 +86,6 @@ int booking(int city)
 	else
 		cout << "Invalid city";
 	return 0;
-
-
 }
 int get_count_of_plots(int city) {
 	switch (city) {
@@ -139,8 +137,8 @@ int main()
 {
 	int city;
 	int chaos;
-	char n = true;
-	cout << "====================WELCOME TO PLOTIFY====================\n";
+	bool n = true;
+	cout << "====================WELCOME TO PLOTIFY======================\n";
 	while (n) {
 
 		cout << "\n1)SELLING\n2)BOOKING\n What do you wanna do ? (1 or 2)";
