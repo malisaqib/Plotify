@@ -163,6 +163,7 @@ int main()
 			cin >> city;
 			city = city - 1; //index starts from 0 of an array
 			booking(city);
+			// jy gayys
 			break;
 		}
 		default:
