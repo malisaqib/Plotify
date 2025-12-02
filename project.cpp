@@ -3,7 +3,7 @@ using namespace std;
 int hosting(int city);
 long int temp;
 double temp_f;
-int i = 0, j = 0, k = 0, l = 0, m = 0, n = 0, o = 0;
+int i = 0, j = 0, k = 0, l = 0, m = 0, n = 0, o = 0, a=0 , b=0, c=0, d=0, e=0, f=0, g=0, h=0;
 int check_info(int p, int s);
 int get_info(int city);
 int critera_checker(int city2);
@@ -30,6 +30,14 @@ int hosting(int city)    //This function calls function on basis of the city
 		case 4: check_info(4, m); m++; break;
 		case 5: check_info(5, n); n++; break;
 		case 6: check_info(6, o); o++; break;
+		case 7: check_info(7, a); a++; break;
+		case 8: check_info(8, b); b++; break;
+		case 9: check_info(9, c); c++; break;
+		case 10: check_info(10, d); d++; break;
+		case 11: check_info(11, e); e++; break;
+		case 12: check_info(12, f); f++; break;
+		case 13: check_info(13, g); g++; break;
+		case 14: check_info(14,h); h++; break;
 		default: cout << "Invalid city";
 		}
 		return 0;
@@ -96,6 +104,15 @@ int get_count_of_plots(int city) {
 	case 4: return m;
 	case 5: return n;
 	case 6: return o;
+	case 7: return a;
+	case 8: return b;
+	case 9: return c;
+	case 10: return d;
+	case 11: return e;
+	case 12: return f;
+	case 13: return g;
+	case 14: return h;
+
 	default: return 0;
 	}
 }
