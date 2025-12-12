@@ -1,50 +1,76 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <iomanip> // Still needed for setprecision if used elsewhere
+
 using namespace std;
 
-void save_all(); 
-void load_all(); 
+// Function Prototypes
+void save_all();
+void load_all();
 void listPlots(int city);
 int hosting(int city);
 int check_info(int p, int s);
 int booking(int city);
 int critera_checker(int city2);
 
-// counters for each city
-int counting[]={0,0,0,0,0,0,0};
+// Total cities supported (Indices 0 to 19)
+const int NUM_CITIES = 20; 
+int counting[NUM_CITIES] = {0}; // All counters initialized to 0
 
 struct info {
     long long client_price;
     long long seller_price;
     string phone;
     double size_of_plot;
-    int type_of_plot;
+    int type_of_plot; // 1=Residential, 2=Commercial
     bool avail;
-	string address;
+    string address;
 };
 
-info selling[7][100];
+// Main data array (20 cities, 100 plots max each)
+info selling[NUM_CITIES][100]; 
 info buying;
 
+// City Names for display
+const string CITY_NAMES[NUM_CITIES] = {
+    "Islamabad", "Rawalpindi", "Lahore", "Karachi", "Sargodha", 
+    "Abottabad", "Multan", "Faisalabad", "Peshawar", "Quetta", 
+    "Sialkot", "Gujranwala", "Hyderabad", "Sukkur", "Bahawalpur", 
+    "Jhelum", "Murree", "Mardan", "Gujrat", "Larkana"
+};
+
+// --- Helper function to display the city menu simply ---
+void display_city_table() {
+    cout << "\nCities (Choose the corresponding number):\n";
+    const int COLUMNS = 4;
+    
+    for (int i = 0; i < NUM_CITIES; ++i) {
+        cout << (i + 1) << " " << CITY_NAMES[i] << "\t"; // Use a simple tab
+        
+        if ((i + 1) % COLUMNS == 0) {
+            cout << "\n";
+        }
+    }
+    cout << "\nChoose: ";
+}
+
 // -------------------------------
-// Save ALL plots to ONE file
+// Save ALL plots to file
 // -------------------------------
 void save_all() {
-    // This function now correctly saves the entire state of the selling array
     ofstream file("plots_db.txt");
 
-    for (int city = 0; city < 7; city++) {
-        int count = counting[city];
-
-        for (int x = 0; x < count; x++) {
+    for (int city = 0; city < NUM_CITIES; city++) {
+        for (int x = 0; x < counting[city]; x++) {
             file << city << " "
-                 << selling[city][x].seller_price<< " "
+                 << selling[city][x].seller_price << " "
                  << selling[city][x].phone << " "
                  << selling[city][x].size_of_plot << " "
                  << selling[city][x].type_of_plot << " "
-                 << selling[city][x].address << " "
-                 << selling[city][x].avail << "\n";
+                 << selling[city][x].avail << " "
+                 << "\"" << selling[city][x].address << "\"" // Quoted address
+                 << "\n";
         }
     }
 
@@ -65,88 +91,99 @@ void load_all() {
                  >> temp.seller_price >> temp.phone
                  >> temp.size_of_plot >> temp.type_of_plot >> temp.avail)
     {
-        selling[city][ counting[city] ] = temp; // store record
-        counting[city]++;                       // increment correct city's counter
+        if (city < 0 || city >= NUM_CITIES) continue;
+
+        file.ignore(); // Consume the space before the quoted address
+        getline(file, temp.address);
+
+        // Remove quotes around the address loaded from file
+        if (!temp.address.empty() && temp.address.front() == '"' && temp.address.back() == '"')
+            temp.address = temp.address.substr(1, temp.address.size() - 2);
+
+        selling[city][counting[city]] = temp;
+        counting[city]++;
     }
 
     file.close();
 }
-// // -------------------------------
+
+// -------------------------------
 // MAIN INFO ENTRY FOR SELLER
-// (save_all() is REMOVED from here)
 // -------------------------------
 int check_info(int p, int s) {
     if (s >= 100) {
         cout << "City capacity full.\n";
         return 1;
     }
-    int temp;
-	bool working=true;
-    cout << "\nEnter the non negotiable minimum price for plot(PKR): ";
+
+    int temp_type;
+    bool working = true;
+
+    cout << "\nEnter minimum asking price (PKR): ";
     cin >> selling[p][s].seller_price;
 
     cout << "Enter your phone number: ";
     cin >> selling[p][s].phone;
 
-	cout<<"Enter address: ";
-	cin >> selling[p][s].address;
+    cin.ignore(); // Clear buffer for getline
 
-	while(working)
-	{    
-		cout << "Type of plot (1=Residential,2=Commercial): ";
-    cin >> temp;
-	   if(temp!=1&&temp!=2)
-	
-	cout<<"ENTER 1 OR 2!, TRY AGAIN!";
-	else 
-	   working=false;
-}
-	selling[p][s].type_of_plot=temp;
-	
+    cout << "Enter detailed address: ";
+    getline(cin, selling[p][s].address);
+
+    while (working) {
+        cout << "Type of plot (1=Residential, 2=Commercial): ";
+        cin >> temp_type;
+        if (temp_type != 1 && temp_type != 2)
+            cout << "ENTER 1 OR 2! Try again.\n";
+        else
+            working = false;
+    }
+    selling[p][s].type_of_plot = temp_type;
+
     cout << "Enter size (marla): ";
     cin >> selling[p][s].size_of_plot;
 
     selling[p][s].avail = true;
-
     cout << "\nYour plot has been added.\n";
 
     return 0;
 }
-    int hosting(int city) {
-    if (city < 0 || city > 6) {
-        cout << "Invalid city.\n";
+
+// -------------------------------
+// HOSTING: Add plot flow
+// -------------------------------
+int hosting(int city) {
+    if (city < 0 || city >= NUM_CITIES) { 
+        cout << "Invalid city selection.\n";
         return 1;
     }
-   if(counting[city]>=100){
-        cout<<"City capacity full.\n";
+    if (counting[city] >= 100) {
+        cout << "City capacity full.\n";
         return 1;
-   }
-   check_info(city, counting[city]);
-   //incremment the counter for that city
-   counting[city]++;  
-
-    // SAVE THE DATA NOW that the new plot is in the array AND the counter is updated
-    save_all(); 
+    }
+    check_info(city, counting[city]);
+    counting[city]++;
+    save_all();
     return 0;
 }
 
 // -------------------------------
-// BUYING / BOOKING
+// BUYING: Get criteria
 // -------------------------------
 int booking(int city) {
-    cout << "\nEnter max price you can pay: ";
+    cout << "\nEnter maximum price you can pay: ";
     cin >> buying.client_price;
 
-    cout << "Type of plot (1=Residential,2=Commercial): ";
+    cout << "Type of plot (1=Residential, 2=Commercial): ";
     cin >> buying.type_of_plot;
 
     cout << "Enter required size (marla): ";
     cin >> buying.size_of_plot;
 
-    if (city >= 0 && city <= 6)
+    if (city >= 0 && city < NUM_CITIES)
         critera_checker(city);
     else
-        cout << "Invalid city.";
+        cout << "Invalid city.\n";
 
     return 0;
 }
@@ -155,31 +192,32 @@ int booking(int city) {
 // CRITERIA CHECKER
 // -------------------------------
 int critera_checker(int city2) {
-    int f = counting[city2];
+    if (city2 < 0 || city2 >= NUM_CITIES) return 0;
+    
+    int count = counting[city2];
 
-    for (int x = 0; x < f; x++) {
+    for (int x = 0; x < count; x++) {
 
-        if (!selling[city2][x].avail) continue; //skips iteration where plot is not available
-       long accomodate = selling[city2][x].seller_price-buying.client_price;   //to help user find plots slightly above his budget
-        bool price_ok =
-            (buying.client_price >= selling[city2][x].seller_price)||(accomodate<50000);
+        if (!selling[city2][x].avail) continue;
 
-        bool type_ok =
-            (buying.type_of_plot == selling[city2][x].type_of_plot);
+        // Check 1: Price difference tolerance
+        long price_diff = selling[city2][x].seller_price - buying.client_price;
+        bool price_ok = 
+            (buying.client_price >= selling[city2][x].seller_price) || (price_diff < 50000);
 
-        bool size_ok =
-            (buying.size_of_plot <= selling[city2][x].size_of_plot);
+        bool type_ok = (buying.type_of_plot == selling[city2][x].type_of_plot);
+        bool size_ok = (buying.size_of_plot <= selling[city2][x].size_of_plot);
 
         if (price_ok && type_ok && size_ok) {
 
-            cout << "\nPlot Found!\n";
-            cout << "Phone: " << selling[city2][x].phone << endl;
-            cout << "Price Range: " << selling[city2][x].seller_price << endl;
-            cout << "Size: " << selling[city2][x].size_of_plot << endl;
+            cout << "\n--- Match Found in " << CITY_NAMES[city2] << " ---" << endl;
+            cout << "Seller Contact: " << selling[city2][x].phone << endl;
+            cout << "Plot Address: " << selling[city2][x].address << endl;
+            cout << "Seller Price: " << selling[city2][x].seller_price << endl;
+            cout << "Size: " << selling[city2][x].size_of_plot << " marla" << endl;
 
             selling[city2][x].avail = false;
-
-            save_all(); // update file ()
+            save_all(); // Update availability status in file
             return 1;
         }
     }
@@ -187,66 +225,82 @@ int critera_checker(int city2) {
     cout << "\nNo matching plot found.\n";
     return 0;
 }
-//PROGRAM THAT PRINTS ALL PLOTS IN A CITY:
+
+// -------------------------------
+// LIST PLOTS (Option 1)
+// -------------------------------
 void listPlots(int city) {
-    if (city >= 0 && city <= 6) {
-        cout << "\nCity " << city << " has " << counting[city] << " plots:\n";
+    if (city >= 0 && city < NUM_CITIES) { 
+        cout << "\n--- Available Plots in " << CITY_NAMES[city] << " (" << city + 1 << ") ---\n";
+        
+        bool found_plots = false;
+        
         for (int i = 0; i < counting[city]; ++i) {
-            cout << "Index " << i
-                 << " | phone: " << selling[city][i].phone
-                 << " | price: " << selling[city][i].seller_price
-                 << " | size: " << selling[city][i].size_of_plot
-                 << " | type: " << selling[city][i].type_of_plot
-                 << " | address: " << selling[city][i].address
-                 << " | available: " << (selling[city][i].avail ? "yes" : "no") << '\n';
+            if (selling[city][i].avail) {
+                found_plots = true;
+                cout << "Plot Index " << i+1 << ":\n"
+                     << "  Price: " << selling[city][i].seller_price
+                     << " | Size: " << selling[city][i].size_of_plot
+                     << " | Type: " << (selling[city][i].type_of_plot == 1 ? "Residential" : "Commercial")
+                     << " | Address: " << selling[city][i].address << '\n';
+            }
         }
-    }
-    else {
+        if (!found_plots) {
+            cout << "No currently available plots listed for " << CITY_NAMES[city] << ".\n";
+        }
+    } else {
         cout << "Invalid city.\n";
     }
 }
+
 // -------------------------------
 // MAIN PROGRAM
 // -------------------------------
 int main() {
-    load_all();  // load data at start
+    load_all();
 
-    int city, opt;
+    int city;
     bool running = true;
 
     cout << "====================WELCOME TO PLOTIFY======================\n";
 
     while (running) {
-                cout << "\nMenu:\n1) List plots\n2) Add selling plot\n3) Book a plot\n4) Exit\nChoose: ";
+        cout << "\n--- Main Menu ---\n1) List available plots\n2) Add a selling plot\n3) Book a plot\n4) Exit\nChoose: ";
         int opt;
         cin >> opt;
 
         if (cin.fail()) {
-    cin.clear();
-    cin.ignore(1000, '\n');
-    cout << "Error: Please enter a valid number!\n";
-    return 0; // or loop back to menu
-                    }
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Error: Please enter a valid number!\n";
+            continue;
+        }
+
         switch (opt) {
-           case 1: {
-                     cout << "Cities:\n1 Islamabad\n2 Rawalpindi\n3 Lahore\n4 Karachi\n5 Sargodha\n6 Abottabad\n7 Multan\nChoose: ";
-                     cin  >> city;
-                     city -= 1;
-                       listPlots(city);
+            case 1:
+            case 2:
+            case 3:
+                display_city_table();
+                cin >> city;
+                if (cin.fail()) { // Check for failure after city input too
+                    cin.clear();
+                    cin.ignore(1000, '\n');
+                    cout << "Error: Invalid city number!\n";
                     break;
-           }     
-            case 2: cout << "Cities:\n1 Islamabad\n2 Rawalpindi\n3 Lahore\n4 Karachi\n5 Sargodha\n6 Abottabad\n7 Multan\nChoose: ";
-                cin >> city;
-                city -= 1;
-                hosting(city);
+                }
+                city -= 1; // Convert to 0-based index
+
+                if (opt == 1) listPlots(city);
+                else if (opt == 2) hosting(city);
+                else if (opt == 3) booking(city);
                 break;
-            case 3:    cout << "Cities:\n1 Islamabad\n2 Rawalpindi\n3 Lahore\n4 Karachi\n5 Sargodha\n6 Abottabad\n7 Multan\nChoose: ";
-                cin >> city;
-                city -= 1;
-                booking(city);
+                
+            case 4:
+                running = false; 
                 break;
-            case 4: running = false; break;
-            default: cout << "Invalid option.\n";
+                
+            default:
+                cout << "Invalid menu option.\n";
         }
     }
 
