@@ -374,9 +374,9 @@ int main() {
                     cout << "\n\tYou can either book by entering index from the city list or give criterias to see if we can find the perfect plot for you\n";
                     
                     cout << "\tHow do you want to buy a plot?\n";
-                    cout << "\t1) Enter index from the plot list\n";
-                    cout << "\t2) Find plot through exact criteria\n";
-                    cout << "\tChoose Option: ";
+                    cout << "\t1) Enter index from the plot list of the last city you saw plots of \n";
+                    cout << "\t2) Find plot through exact criteria in any city\n";
+                    cout << "\tChoose Option (1 or 2): ";
                     
                     if (!(cin >> option)) {
                         cin.clear();
@@ -417,7 +417,7 @@ int main() {
             }
             case 4:
                 running = false;
-                cout << "\n\tThank you for using Plotify. Goodbye!\n";
+                cout << "\n\tThank you for using Plotify!\n\tWE ARE HAPPY IF WE COULD HELP YOU FIND THE BEST PLOT FOR YOU!\n\tHOPE TO SEE YOU AGAIN!\n\tGoodbye!\n";
                 break;
             default:
                 cout << "\n\tInvalid menu option. Please choose 1, 2, 3, or 4.\n";
