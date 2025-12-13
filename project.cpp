@@ -14,6 +14,8 @@ int buying_plot(int city);
 int critera_checker(int city);
 void index_check_plot(int city);
 bool confirm_booking(int city, int plot_index);
+double get_valid_size();
+char get_valid_unit();
 
 const int NUM_CITIES = 20;
 int counting[NUM_CITIES] = {0};
@@ -39,19 +41,19 @@ const string CITY_NAMES[NUM_CITIES] = {
 };
 
 double convert_to_marla(double size, char unit) {
-    if (unit == 'k' || unit == 'K') return size * 20;    
+    if (unit == 'k' || unit == 'K') return size * 20;
     return size;
 }
 
 void display_city_table() {
-    cout << "\nWe have the following cities in our portfolia, which city do you want to see plots in\n";
-    cout << "\nCities (Choose the corresponding number):\n";
+    cout << "\nWe have the following cities in our portfolio, which city do you want to see plots in\n";
+    cout << "\nCities (Choose index of the option):\n";
     const int COLUMNS = 4;
     for (int i = 0; i < NUM_CITIES; ++i) {
         cout << (i + 1) << " " << CITY_NAMES[i] << "\t";
         if ((i + 1) % COLUMNS == 0) cout << "\n";
     }
-    cout << "\nChoose: ";
+    cout << "\nChoose index of the option: ";
 }
 
 void save_all() {
@@ -59,12 +61,12 @@ void save_all() {
     for (int city = 0; city < NUM_CITIES; city++) {
         for (int x = 0; x < counting[city]; x++) {
             file << city << " "
-                << selling[city][x].seller_price << " "
-                << selling[city][x].phone << " "
-                << selling[city][x].size_of_plot << " "
-                << selling[city][x].type_of_plot << " "
-                << selling[city][x].avail << " "
-                << "\"" << selling[city][x].address << "\"" << "\n";
+                 << selling[city][x].seller_price << " "
+                 << selling[city][x].phone << " "
+                 << selling[city][x].size_of_plot << " "
+                 << selling[city][x].type_of_plot << " "
+                 << selling[city][x].avail << " "
+                 << "\"" << selling[city][x].address << "\"" << "\n";
         }
     }
     file.close();
@@ -89,43 +91,71 @@ void load_all() {
     file.close();
 }
 
+double get_valid_size() {
+    double size;
+    while (true) {
+        if (!(cin >> size) || size <= 0) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input. Enter a positive number: ";
+            continue;
+        }
+        break;
+    }
+    return size;
+}
+
+char get_valid_unit() {
+    char unit;
+    while (true) {
+        cin >> unit;
+        if (unit != 'm' && unit != 'M' && unit != 'k' && unit != 'K') {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid unit. Enter 'm' for Marla or 'k' for Kanal: ";
+            continue;
+        }
+        break;
+    }
+    return unit;
+}
+
 int check_info(int CITY, int PLOT) {
     if (PLOT >= 100) {
         cout << "City capacity full.\n";
         return 1;
     }
     int temp_type;
-    bool working = true;
-    cout << "\nEnter minimum asking price (PKR): ";
-    cin >> selling[CITY][PLOT].seller_price;
-    cout << "Enter your phone number: ";
-    cin >> selling[CITY][PLOT].phone;
+    while (true) {
+        cout << "\nSelect plot type:\n1) Residential\n2) Commercial\nType index of the option (1 or 2): ";
+        if (!(cin >> temp_type) || (temp_type != 1 && temp_type != 2)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input.\n";
+            continue;
+        }
+        break;
+    }
+    selling[CITY][PLOT].type_of_plot = temp_type;
+
+    cout << "Enter size (number followed by unit m for marla, k for kanal, e.g., 5 k or 10 m): ";
+    double size = get_valid_size();
+    char unit = get_valid_unit();
+    selling[CITY][PLOT].size_of_plot = convert_to_marla(size, unit);
+
     cin.ignore();
     cout << "Enter detailed address: ";
     getline(cin, selling[CITY][PLOT].address);
 
-    while (working) {
-        cout << "\nSelect plot type:\n";
-        cout << "\t1) Residential\n";
-        cout << "\t2) Commercial\n";
-        cout << "Type (1 or 2): ";
-        
-        if (!(cin >> temp_type) || (temp_type != 1 && temp_type != 2)) {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "\n\tInvalid input! Please enter 1 for Residential or 2 for Commercial.\n";
-            continue; 
-        }
-        working = false;
-    }
-    
-    selling[CITY][PLOT].type_of_plot = temp_type;
+    cout << "Enter your phone number: ";
+    cin >> selling[CITY][PLOT].phone;
 
-    double size;
-    char unit;
-    cout << "Enter size (number followed by unit m for marla, k for kanal, e.g., 5 k or 10 m): ";
-    cin >> size >> unit;
-    selling[CITY][PLOT].size_of_plot = convert_to_marla(size, unit);
+    cout << "Enter minimum asking price (PKR): ";
+    while (!(cin >> selling[CITY][PLOT].seller_price) || selling[CITY][PLOT].seller_price <= 0) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Invalid input. Enter a positive number for price: ";
+    }
 
     selling[CITY][PLOT].avail = true;
     cout << "\nYour plot has been added.\n";
@@ -165,32 +195,31 @@ int critera_checker(int city) {
 }
 
 int buying_plot(int city) {
-    double size;
-    char unit;
     cout << "\nEnter maximum price you can pay: ";
-    cin >> buying.client_price;
+    while (!(cin >> buying.client_price) || buying.client_price <= 0) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Invalid input. Enter a positive number for price: ";
+    }
 
     int temp_type;
-    bool working = true;
-    while (working) {
-        cout << "\nSelect required plot type:\n";
-        cout << "\t1) Residential\n";
-        cout << "\t2) Commercial\n";
-        cout << "Type (1 or 2): ";
-        
+    while (true) {
+        cout << "\nSelect required plot type:\n1) Residential\n2) Commercial\nType index of the option (1 or 2): ";
         if (!(cin >> temp_type) || (temp_type != 1 && temp_type != 2)) {
             cin.clear();
             cin.ignore(1000, '\n');
-            cout << "\n\tInvalid input! Please enter 1 for Residential or 2 for Commercial.\n";
-            continue; 
+            cout << "Invalid input.\n";
+            continue;
         }
-        working = false;
+        break;
     }
     buying.type_of_plot = temp_type;
 
     cout << "Enter required size (number followed by unit m for marla, k for kanal, e.g., 2 k or 10 m): ";
-    cin >> size >> unit;
+    double size = get_valid_size();
+    char unit = get_valid_unit();
     buying.size_of_plot = convert_to_marla(size, unit);
+
     if (city >= 0 && city < NUM_CITIES)
         critera_checker(city);
     else
@@ -237,43 +266,31 @@ void index_check_plot(int city) {
         cout << "No plots available in this city.\n";
         return;
     }
-    
     int ind;
     bool booking_successful = false;
-    
     while (!booking_successful) {
         cout << "Enter the plot index you want to buy (1 to "
              << counting[city] << ") or enter 0 to cancel: ";
-        
         if (!(cin >> ind)) {
             cin.clear();
             cin.ignore(1000, '\n');
             cout << "Invalid input. Please enter a number.\n";
             continue;
         }
-
         if (ind == 0) {
             cout << "Plot selection cancelled.\n";
             return;
         }
-
         if (ind < 1 || ind > counting[city]) {
             cout << "Index not available. Please enter a number between 1 and " << counting[city] << ".\n";
             continue;
         }
-
         int plot_index = ind - 1;
-        
         if (!selling[city][plot_index].avail) {
             cout << "Sorry, plot (Index " << ind << ") is already booked. Please choose another index.\n";
             continue;
         }
-
-        if (confirm_booking(city, plot_index)) {
-            booking_successful = true;
-        } else {
-            cout << "Booking cancelled. Please enter another index or 0 to return to the main menu.\n";
-        }
+        if (confirm_booking(city, plot_index)) booking_successful = true;
     }
 }
 
@@ -281,27 +298,23 @@ void listPlots(int city) {
     if (city >= 0 && city < NUM_CITIES) {
         cout << "\n--- Available Plots in " << CITY_NAMES[city] << " (" << city + 1 << ") ---\n";
         bool found_plots = false;
-
         cout << "----------------------------------------------------------------------------------------------------------------------\n";
         cout << "| Index | Price (PKR) | Size (Marla) | Size (Kanal) | Type        | Address                                                     |\n";
         cout << "----------------------------------------------------------------------------------------------------------------------\n";
-        
         for (int i = 0; i < counting[city]; ++i) {
             if (selling[city][i].avail) {
                 found_plots = true;
                 double marla = selling[city][i].size_of_plot;
                 double kanal = marla / 20.0;
-                
-                cout << "| " << setw(5) << left << i + 1 
-                     << " | " << setw(11) << left << selling[city][i].seller_price 
-                     << " | " << setw(12) << left << marla 
-                     << " | " << setw(12) << left << fixed << setprecision(2) << kanal 
+                cout << "| " << setw(5) << left << i + 1
+                     << " | " << setw(11) << left << selling[city][i].seller_price
+                     << " | " << setw(12) << left << marla
+                     << " | " << setw(12) << left << fixed << setprecision(2) << kanal
                      << " | " << setw(11) << left << (selling[city][i].type_of_plot == 1 ? "Residential" : "Commercial")
                      << " | " << setw(57) << left << selling[city][i].address.substr(0, 57) << " |\n";
             }
         }
         cout << "----------------------------------------------------------------------------------------------------------------------\n";
-        
         if (!found_plots) cout << "No currently available plots listed for " << CITY_NAMES[city] << ".\n";
     } else cout << "Invalid city.\n";
 }
@@ -316,7 +329,6 @@ int main() {
     cout << "\n\t\t==================================================\n";
     cout << "\t\t\t\t  WELCOME TO PLOTIFY\n";
     cout << "\t\t==================================================\n";
-    
     cout << "Plotify is a console-based real estate assistant, simplifying the process of listing "
          << "properties for sale and finding the perfect plot to match your requirements and budget.\n";
 
@@ -326,7 +338,7 @@ int main() {
         cout << "\t2) Add a selling plot\n";
         cout << "\t3) Book a plot\n";
         cout << "\t4) Exit\n";
-        cout << "\n\tChoose: ";
+        cout << "\n\tChoose index of the option: ";
 
         int opt;
         if (!(cin >> opt)) {
@@ -364,60 +376,47 @@ int main() {
                 break;
             }
             case 3: {
-                if (index_selection_option) {
-                    if (last_listed_city < 0) {
-                        cout << "\tNo city listed previously.\n";
-                        break;
-                    }
-                    int option;
-                    
-                    cout << "\n\tYou can either book by entering index from the city list or give criterias to see if we can find the perfect plot for you\n";
-                    
-                    cout << "\tHow do you want to buy a plot?\n";
-                    cout << "\t1) Enter index from the plot list of the last city you saw plots of \n";
-                    cout << "\t2) Find plot through exact criteria in any city\n";
-                    cout << "\tChoose Option (1 or 2): ";
-                    
+                int option;
+                if (index_selection_option && last_listed_city >= 0) {
+                    cout << "\nYou can either book by index from the last city you saw list of, or search by criteria in any city.\n";
+                    cout << "1) Enter index from the last listed city\n";
+                    cout << "2) Find plot through exact criteria\n";
+                    cout << "Choose index of the option: ";
                     if (!(cin >> option)) {
                         cin.clear();
                         cin.ignore(1000, '\n');
-                        cout << "\n\tInvalid input\n";
+                        cout << "Invalid input\n";
                         break;
                     }
-                    
-                    if (option == 1) {
-                        index_check_plot(last_listed_city);
-                    } else if (option == 2) {
+                    if (option == 1) index_check_plot(last_listed_city);
+                    else if (option == 2) {
                         display_city_table();
                         if (!(cin >> city)) {
                             cin.clear();
                             cin.ignore(1000, '\n');
-                            cout << "\n\tError: Invalid city number!\n";
+                            cout << "Error: Invalid city number!\n";
                             break;
                         }
                         city -= 1;
                         buying_plot(city);
-                    } else {
-                        cout << "\tInvalid command\n";
-                    }
-                    index_selection_option = false;
+                    } else cout << "Invalid command\n";
                 } else {
                     display_city_table();
                     if (!(cin >> city)) {
                         cin.clear();
                         cin.ignore(1000, '\n');
-                        cout << "\n\tError: Invalid city number!\n";
+                        cout << "Error: Invalid city number!\n";
                         break;
                     }
                     city -= 1;
                     buying_plot(city);
-                    index_selection_option = false;
                 }
+                index_selection_option = false;
                 break;
             }
             case 4:
                 running = false;
-                cout << "\n\tThank you for using Plotify!\n\tWE ARE HAPPY IF WE COULD HELP YOU FIND THE BEST PLOT FOR YOU!\n\tHOPE TO SEE YOU AGAIN!\n\tGoodbye!\n";
+                cout << "\n\tThank you for using Plotify!\n\tGoodbye!\n";
                 break;
             default:
                 cout << "\n\tInvalid menu option. Please choose 1, 2, 3, or 4.\n";
