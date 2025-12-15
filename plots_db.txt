@@ -8,7 +8,11 @@
 0 450000000 03332456789 25 2 0 "Plot No. 1, Blue Area, F-6 Commercial Strip, Islamabad"
 0 4000000 03351925185 20 2 0 ""
 0 4000000 657576868868 6 1 0 "78yiknm,dhg"
+<<<<<<< HEAD
 0 556000 0334978320 509 1 1 "House 1537"
+=======
+0 100000 03338894889 10 1 1 "house 13 block y"
+>>>>>>> b63de4b763a81052aa4835b6bc6a4d738d39223c
 1 7000000 03451234567 4 1 1 "Plot No. 25, Bahria Town Phase 8, Sector N, Rawalpindi"
 1 21000000 03002345678 10 1 1 "House No. 543, PWD Housing Scheme, Block 3, Rawalpindi"
 1 45000000 03333456789 20 1 1 "Plot No. 110, DHA Phase 1, Sector F, Rawalpindi"
