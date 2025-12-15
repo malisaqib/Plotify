@@ -17,7 +17,7 @@ void index_check_plot(int city);     // Allows buying based on index selection
 bool confirm_booking(int city, int plot_index); // Confirms booking and marks unavailable
 double get_valid_size();             // Validates numeric plot size input
 char get_valid_unit();               // Validates unit (Marla/Kanal)
-
+void cin_clear();
 // Total number of cities
 const int NUM_CITIES = 20;
 
@@ -38,6 +38,11 @@ string address;           // Address of the plot
 // 2D array storing all selling plots for each city
 info selling[NUM_CITIES][100];
 info buying; // Stores the current buyer's requirements
+//cin clear function
+void cin_clear(){
+    cin.clear();
+    cin.ignore(1000, '\n');
+}
 
 // Names of all cities
 const string CITY_NAMES[NUM_CITIES] = {
@@ -115,8 +120,7 @@ double get_valid_size() {
 double size;
 while (true) {
 if (!(cin >> size) || size <= 0) { // Must be positive number
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid input. Enter a positive number: ";
 continue;
  }
@@ -131,8 +135,7 @@ char unit;
 while (true) {
 cin >> unit;
 if (unit != 'm' && unit != 'M' && unit != 'k' && unit != 'K') {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid unit. Enter 'm' for Marla or 'k' for Kanal: ";
 continue;
  }
@@ -155,8 +158,7 @@ int temp_type;
 while (true) {
 cout << "\nSelect plot type:\n1) Residential\n2) Commercial\nType index of the option (1 or 2): ";
 if (!(cin >> temp_type) || (temp_type != 1 && temp_type != 2)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid input.\n";
 continue;
  }
@@ -181,8 +183,7 @@ cin >> selling[CITY][PLOT].phone;
 // Get minimum asking price
 cout << "Enter minimum asking price (PKR): ";
 while (!(cin >> selling[CITY][PLOT].seller_price) || selling[CITY][PLOT].seller_price <= 0) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid input. Enter a positive number for price: ";
  }
 
@@ -247,8 +248,7 @@ int buying_plot(int city) {
 
 cout << "\nEnter maximum price you can pay: ";
 while (!(cin >> buying.client_price) || buying.client_price <= 0) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid input. Enter a positive number for price: ";
 }
 
@@ -258,8 +258,7 @@ int temp_type;
 while (true) {
 cout << "\nSelect required plot type:\n1) Residential\n2) Commercial\nType index of the option (1 or 2): ";
 if (!(cin >> temp_type) || (temp_type != 1 && temp_type != 2)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid input.\n";
 continue;
  }
@@ -343,8 +342,7 @@ cout << "Enter the plot index you want to buy (1 to "
 << counting[city] << ") or enter 0 to cancel: ";
 
 if (!(cin >> ind)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid input. Please enter a number.\n";
 continue;
  }
@@ -436,8 +434,7 @@ cout << "\n\tChoose index of the option: ";
 
 int opt;
 if (!(cin >> opt)) { // Validate menu input
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "\n\tError: Please enter a valid number!\n";
 continue;
  }
@@ -448,8 +445,7 @@ case 1: { // LIST PLOTS
 display_city_table();
 
 if (!(cin >> city)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "\n\tError: Invalid city number!\n";
 break;
  }
@@ -465,8 +461,7 @@ case 2: { // ADD SELLING PLOT
 display_city_table();
 
 if (!(cin >> city)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "\n\tError: Invalid city number!\n";
 break;
  }
@@ -488,8 +483,7 @@ cout << "2) Find plot through exact criteria\n";
 cout << "Choose index of the option: ";
 
 if (!(cin >> option)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Invalid input\n";
 break;
  }
@@ -501,8 +495,7 @@ else if (option == 2) {
 display_city_table();
 
 if (!(cin >> city)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Error: Invalid city number!\n";
 break;
  }
@@ -517,8 +510,7 @@ buying_plot(city);
 display_city_table();
 
 if (!(cin >> city)) {
-cin.clear();
-cin.ignore(1000, '\n');
+cin_clear();
 cout << "Error: Invalid city number!\n";
 break;
  }
